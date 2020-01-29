@@ -15,14 +15,21 @@ let Todo = require('./todo.model');
 app.use(cors());
 app.use(bodyParser.json());
 
-// mongoose.connect('mongodb://127.0.0.1:27017/todos', { useNewUrlParser: true });
-mongoose.connect(process.env.DB_URI, { useNewUrlParser: true });
+mongoose.connect(process.env.DB_URI, {useNewUrlParser: true})
+        .then(() => {
+            console.log("MongoDB database initial connection established successfully.");
+        })
+        .catch((err) => {
+            console.log("ERROR! Could not connect to Database!");
+            console.log(err);
+        });
+
 
 const connection = mongoose.connection;
+connection.on('disconnected',()=> {console.log('lost connection!')});
+connection.on('reconnected',()=> {console.log('reconnected to db again!')});
+        
 
-connection.once('open', function() {
-    console.log("MongoDB database connection established successfully");
-})
 
 todoRoutes.route('/').get(function(req, res) {
     Todo.find(function(err, todos) {
